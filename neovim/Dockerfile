@@ -29,8 +29,12 @@ RUN apk --no-cache add \
     git
 
 # Copy the kickstart.nvim init.lua
-COPY ./kickstart.nvim/init.lua /root/.config/nvim/init.lua
+COPY ./init.lua /root/.config/nvim/init.lua
 
-RUN nvim --headless +PlugInstall +qall
+RUN  nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+RUN  nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+RUN  nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+# RUN  nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+# RUN  nvim --headless +PackerSync +PackerComplete +PackerInstall +qa
 
 ENTRYPOINT [ "nvim" ]
