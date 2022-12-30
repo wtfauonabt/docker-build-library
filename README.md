@@ -8,7 +8,7 @@ This is a personal library that assists in my own personal workflow
 Initiate neovim with kickstart
 
 ```sh
-./build.sh ./neovim/kickstart.nvim neovim latest
+./build.sh ./neovim neovim latest
 ```
 
 ## Terraform
