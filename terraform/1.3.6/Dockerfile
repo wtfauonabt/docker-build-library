@@ -4,7 +4,6 @@ FROM alpine:latest
 RUN apk add curl
 
 ## Set release version as env
-# RUN RELEASE=`curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest |  grep tag_name | cut -d: -f2 | tr -d \"\,\v | awk '{$1=$1};1'`
 ENV RELEASE=1.3.6
 
 ## Download terraform

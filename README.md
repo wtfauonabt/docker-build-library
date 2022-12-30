@@ -16,9 +16,6 @@ Initiate neovim with kickstart
 Initiate terraform
 
 ```sh
-./build.sh ./terraform terraform latest
-
-cd ./terraform && docker build -t wtfauonabt/terraform:latest . && cd -
-docker push wtfauonabt/terraform:latest
-docker build -t wtfauonabt/terraform:latest -f build/terraform/1.3.6/Dockerfile .
+./build.sh -p ./terraform/latest terraform latest
+./build.sh -p ./terraform/1.3.6 terraform latest
 ```
