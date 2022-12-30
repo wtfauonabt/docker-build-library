@@ -5,6 +5,7 @@
 ################################################################################
 DEBUG_MODE=false
 DOCKER_USER="wtfauonabt"
+PUSH_TO_DOCKERHUB=false
 PATH_TO_DOCKERFILE=""
 IMAGE_NAME=""
 IMAGE_TAG=""
@@ -17,10 +18,11 @@ function __dockerBuildHelp() {
     echo
     echo "Docker build"
     echo 
-    echo "Syntax: ./build.sh [-h|u] [PATH TO DOCKERFILE] [IMAGE_NAME] [IMAGE_TAG]"
+    echo "Syntax: ./build.sh [-h|u|n] [PATH TO DOCKERFILE] [IMAGE_NAME] [IMAGE_TAG]"
     echo
     echo "Options:"
     echo "-d | --debug  Debug Mode                                  DEFAULT: $DEBUG_MODE"
+    echo "-p | --push   Push to dockerhub                           DEFAULT: $PUSH_TO_DOCKERHUB"
     echo "-u | --user   Docker Username, sets the user account.     DEFAULT: $DOCKER_USER"
     echo 
     echo "Example:"
@@ -94,13 +96,16 @@ function __setArgv() {
 ## Options handler - exits error code
 function __dockerBuildOptionsHandler(){
     local ERROR_CODE=0
-    while getopts hdu:-: OPT; do
+    while getopts hdpu:-: OPT; do
         if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
             OPT="${OPTARG%%=*}"       # extract long option name
             OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
             OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
         fi
         case "$OPT" in
+            p | push )
+                PUSH_TO_DOCKERHUB=true
+                ;;
             u | user )
                 DOCKER_USER="$OPTARG" ; 
                 ;;
@@ -134,8 +139,10 @@ function __dockerUpload() {
     if [ "$DEBUG_MODE" = true ]; then
         __printDebugMessage "docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG"
     fi
-    docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
-    __handleError $? "Upload Error!!!"
+    if [ "$PUSH_TO_DOCKERHUB" = true ]; then
+        docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
+        __handleError $? "Upload Error!!!"
+    fi
 }
 
 function __dockerBuild() {
