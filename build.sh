@@ -18,7 +18,7 @@ function __dockerBuildHelp() {
     echo
     echo "Docker build"
     echo 
-    echo "Syntax: ./build.sh [-h|u|n] [PATH TO DOCKERFILE] [IMAGE_NAME] [IMAGE_TAG]"
+    echo "Syntax: ./build.sh [-h|d|p|u] [PATH TO DOCKERFILE] [IMAGE_NAME] [IMAGE_TAG]"
     echo
     echo "Options:"
     echo "-d | --debug  Debug Mode                                  DEFAULT: $DEBUG_MODE"
@@ -149,7 +149,10 @@ function __dockerBuild() {
     if [ "$DEBUG_MODE" = true ]; then
         __printDebugMessage "docker build -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG ."
     fi
-    docker build -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG .
+    docker buildx build \
+        -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG \
+        --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
+        .
     __handleError $? "Build Error!!!"
 }
 
@@ -183,3 +186,4 @@ function __main() {
 }
 
 __main $@
+
