@@ -145,13 +145,25 @@ function __dockerUpload() {
     fi
 }
 
-function __dockerBuild() {
+function __dockerBuildx() {
     if [ "$DEBUG_MODE" = true ]; then
-        __printDebugMessage "docker build -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG ."
+        __printDebugMessage "docker buildx build -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG --platform linux/arm/v7,linux/arm64/v8,linux/amd64 ."
     fi
     docker buildx build \
         -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG \
         --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
+        .
+    __handleError $? "Build Error!!!"
+
+
+}
+
+function __dockerBuild() {
+    if [ "$DEBUG_MODE" = true ]; then
+        __printDebugMessage "docker build -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG ."
+    fi
+    docker build \
+        -t $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG \
         .
     __handleError $? "Build Error!!!"
 }
