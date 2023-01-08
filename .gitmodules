@@ -1,0 +1,3 @@
+[submodule "invoiceplane/src"]
+	path = invoiceplane/src
+	url = https://gitlab.com/invoiceplane/InvoicePlane.git
