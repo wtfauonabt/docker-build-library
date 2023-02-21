@@ -12,6 +12,7 @@ RUN pip3 install --no-cache --upgrade pip setuptools
 # Install grpc-dynamic-gateway
 RUN npm install -g nx
 
+ENTRYPOINT ["nx"]
 # WORKDIR /working
 # COPY . /working
 # CMD ["node", "index.js"]

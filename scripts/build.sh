@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ################################################################################
 ## Variables ###################################################################
@@ -12,14 +12,10 @@ IMAGE_TAG=""
 STAPLED_FOLDER=""
 
 ################################################################################
-## Print Messages ##############################################################
+## Help Messages ###############################################################
 ################################################################################
 function __dockerBuildHelp() {
-    echo
-    echo "Docker build"
-    echo 
-    echo "Syntax: ./build.sh [-h|d|p|u] [PATH TO DOCKERFILE] [IMAGE_NAME] [IMAGE_TAG]"
-    echo
+    __printDockerBuildDescription
     echo "Options:"
     echo "-d | --debug  Debug Mode                                  DEFAULT: $DEBUG_MODE"
     echo "-p | --push   Push to dockerhub                           DEFAULT: $PUSH_TO_DOCKERHUB"
@@ -30,64 +26,48 @@ function __dockerBuildHelp() {
     echo
 }
 
-function __printMessage() {
+function __printDockerBuildDescription () {
+    echo
+    echo "Docker build"
+    echo 
+    echo "Syntax: ./build.sh [-h|d|p|u] [PATH TO DOCKERFILE] [IMAGE_NAME] [IMAGE_TAG]"
     echo
     echo "==========================================================================="
-    echo
-    echo $1
-    echo
-    echo "==========================================================================="
-    echo
 }
 
-function __printDebugMessage() {
-    if [ "$DEBUG_MODE" = true ]; then
-        echo
-        echo "DEBUG: $@"
-        echo
-    fi
-}
-
-function __printErrorMessage() {
-    echo
-    echo "ERROR: $@"
-    echo
-
-    __printMessage "Docker build script exit with ERROR"
-}
-
-################################################################################
-## Conditional Validations #####################################################
-################################################################################
-function __validateArgv() {
-    local ERROR_CODE=0
-    if [ "$#" -ne 3 ]; then
-        __handleError 125 "Invalid number of arguments"
-    fi
-}
-
-################################################################################
-## Handle Errors ###############################################################
-################################################################################
-##
-##  $1; Error Code
-##  $2: Error Message
-##
-function __handleError () {
-    local ERROR_CODE=$1
-    if [ "$ERROR_CODE" -gt "0" ]; 
-    then
-        __printErrorMessage $2
-        exit $ERROR_CODE
-    fi
-}
 
 ################################################################################
 ## Variable Modifiers ##########################################################
 ################################################################################
-function __setArgv() {
-    __validateArgv $@
+function __readBuildInput() {
+    __printDockerBuildDescription
+    __printMessage "Please provide information to the following:"
+    read -p 'Path to DockerFile [PATH_TO_DOCKERFILE] (e.g. ./test): ' PATH_TO_DOCKERFILE
+    read -p 'Docker User [DOCKER_USER] (default: wtfauonabt): ' DOCKER_USER
+    read -p 'Image Name [IMAGE_NAME] (e.g. test): ' IMAGE_NAME
+    read -p 'Image Tag [IMAGE_TAG] (e.g. latest): ' IMAGE_TAG
+    read -p 'Push to Registry [PUSH_TO_DOCKERHUB] (y/n): ' INPUT_PUSH
+    if [ "$INPUT_PUSH" = "y" ];then
+        PUSH_TO_DOCKERHUB=true
+    fi
+}
 
+function __validateArgv() {
+    local ERROR_CODE=0
+    if [ "$#" -ne 3 ]; then
+        if ! declare -f __readInput > /dev/null; then
+            __readInput
+            break
+        fi
+        echo 125
+        return
+    fi
+}
+function __setArgv() {
+    local ERROR_CODE=__validateArgv $@
+    if $ERROR_CODE;then
+      __handleError $ERROR_CODE "Invalid number of arguments"  
+    fi
     PATH_TO_DOCKERFILE=$1
     IMAGE_NAME=$2
     IMAGE_TAG=$3
@@ -171,14 +151,16 @@ function __dockerBuild() {
 ################################################################################
 ## Runner ######################################################################
 ################################################################################
-function __main() {
+function __runBuild() {
     __printMessage "Initiating Docker build script..."
 
-    ## Setup options and argv
-    __dockerBuildOptionsHandler $@
-    ## Remove options
-    shift $((OPTIND-1))
-    __setArgv $@
+    # ## Setup options and argv
+    # __dockerBuildOptionsHandler $@
+    # ## Remove options
+    # shift $((OPTIND-1))
+    # __setArgv $@
+
+    __readBuildInput
 
     ## Move to directory
     cd $PATH_TO_DOCKERFILE
@@ -197,5 +179,9 @@ function __main() {
     __printMessage "Docker build script completed"
 }
 
-__main $@
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+source $SCRIPT_DIR/helper/print_handler.sh
+source $SCRIPT_DIR/helper/error_handler.sh
+source $SCRIPT_DIR/helper/params_handler.sh
 

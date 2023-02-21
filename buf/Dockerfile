@@ -1,8 +1,10 @@
-FROM golang:alpine
+FROM bufbuild/buf
 
-## Get Google API
-RUN apk update
-RUN apk add git
+## Install NodeJS
+RUN apk add --update \
+    nodejs \
+    npm \
+    go
 
 WORKDIR /go/src
 RUN git clone \
@@ -24,6 +26,7 @@ RUN apk add --no-cache make protobuf-dev
 #     && unzip -o $PROTOC_ZIP -d /usr/local bin/protoc \
 #     && unzip -o $PROTOC_ZIP -d /usr/local 'include/*' \ 
 #     && rm -f $PROTOC_ZIP
+# ENV PATH="$PATH:$(go env GOPATH)/bin"
 
 ## Go Generator
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -33,7 +36,4 @@ RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
 
 WORKDIR /workspace
-
-ENV PATH="$PATH:$(go env GOPATH)/bin"
-
-
+ENV PATH="$PATH:/root/go/bin"
